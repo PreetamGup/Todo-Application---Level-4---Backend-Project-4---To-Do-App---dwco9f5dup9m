@@ -137,6 +137,31 @@ the latest data will be at the top.
 const getallTask = async (req, res) => {
 
     //Write your code here.
+    
+    const { token  } = req.body;
+    let decodedToken;
+    try{
+        decodedToken = jwt.verify(token, JWT_SECRET);
+    }catch(err){
+        res.status(404).json({
+            status: 'fail',
+            message: 'Invalid token'
+        });
+    }
+    const creator_id = decodedToken.userId;
+    
+    const user= await Users.findById({creator_id})
+    
+    if(user.role==='admin'){
+        const alltask= await Tasks.find({}).sort({timestamps: -1})
+        
+        res.status(200).json({status:'success', data: [alltask]})
+    }else{
+        const task= await Tasks.find({creator_id:creator_id}).sort({timestamps: -1})
+        res.status(200).json({status:'success', data: [task]})
+    }
+    
+    
 }
 
 
