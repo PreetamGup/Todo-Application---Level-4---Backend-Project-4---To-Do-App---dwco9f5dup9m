@@ -149,17 +149,36 @@ const getallTask = async (req, res) => {
         });
     }
     const creator_id = decodedToken.userId;
-    
-    const user= await Users.findById({creator_id})
-    
-    if(user.role==='admin'){
-        const alltask= await Tasks.find({}).sort({timestamps: -1})
-        
-        res.status(200).json({status:'success', data: [alltask]})
+
+    const user= await Users.findById(creator_id)
+
+    const {status}= req.query;
+
+
+    if(status){
+
+        if(user.role==='admin'){
+            const alltask= await Tasks.find({status}).sort({createdAt: -1})
+            
+            res.status(200).json({status:'success', data: alltask})
+        }else{
+            const task= await Tasks.find({creator_id:creator_id, status: status} ).sort({createdAt: -1})
+            res.status(200).json({status:'success', data: task})
+        }
+
     }else{
-        const task= await Tasks.find({creator_id:creator_id}).sort({timestamps: -1})
-        res.status(200).json({status:'success', data: [task]})
+
+        if(user.role==='admin'){
+            const alltask= await Tasks.find({}).sort({createdAt: -1})
+            
+            res.status(200).json({status:'success', data: alltask})
+        }else{
+            const task= await Tasks.find({creator_id:creator_id} ).sort({createdAt: -1})
+            res.status(200).json({status:'success', data: task})
+        }
+
     }
+    
     
     
 }
